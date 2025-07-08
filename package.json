@@ -1,0 +1,24 @@
+{
+  "name": "the-bot",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf build",
+    "build": "tsc --build",
+    "start": "bun run clean && bun run build && bun run build/index.js",
+    "dev": "bun run src/index.ts --watch"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.8",
+    "discord.js": "^14.21.0",
+    "glob": "^11.0.3",
+    "zod": "^3.25.76"
+  }
+}
