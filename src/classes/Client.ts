@@ -21,11 +21,13 @@ export default class TheBotClient extends Client {
     this.handlers = new Handler(this);
   }
 
-  public async LoadHandlers() {
+  public LoadHandlers() {
+      this.handlers.RegisterCommands();
     this.handlers.LoadEvents();
   }
 
   public async Start() {
+    console.log(`Launching the bot in ${this.env.NODE_ENV} mode`);
     this.LoadHandlers();
     this.login(this.env.TOKEN).catch((err) => console.error(err));
   }

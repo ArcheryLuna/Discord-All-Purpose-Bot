@@ -1,9 +1,11 @@
 import { glob } from "glob";
 import type IHandler from "types/IHandler";
 import path from "path";
-import { env } from "config/environments";
 import type Event from "./Events";
 import type TheBotClient from "server";
+import type SlashCommand from "./SlashCommands/SlashCommand";
+import type SubSlashCommand from "./SlashCommands/SubSlashCommand";
+import { REST, Routes, type Collection } from "discord.js";
 
 export default class Handler implements IHandler {
   client: TheBotClient;
@@ -12,10 +14,65 @@ export default class Handler implements IHandler {
     this.client = client;
   }
 
+  private async SlashCommandGetJson(
+    commands: Collection<string, SlashCommand>,
+  ): Promise<object[]> {
+    const data: object[] = [];
+
+    commands.map((command) => {
+      data.push({
+        name: command.name,
+        description: command.description,
+        options: command.options,
+        default_member_permissions:
+          command.default_member_permissions.toString(),
+        dm_permission: command.dm_permission,
+      });
+    });
+
+    return data;
+  }
+
+  async RegisterCommands() {
+    this.LoadSlashCommands().then(async () => {
+        const commands = await this.SlashCommandGetJson(this.client.slashCommands);
+        const rest = new REST().setToken(this.client.env.TOKEN);
+        try {
+            if (
+                this.client.env.NODE_ENV === "development" ||
+                this.client.env.NODE_ENV === "test"
+            ) {
+                const setCommands: any = await rest.put(
+                    Routes.applicationGuildCommands(
+                        this.client.env.CLIENT_ID,
+                        this.client.env.GUILD_ID,
+                    ),
+                    {
+                        body: commands,
+                    },
+                );
+
+                console.log(
+                    `Successfully set ${setCommands.length} commands in dev guild!`,
+                );
+            } else {
+                const setCommands: any = await rest.put(
+                    Routes.applicationCommands(this.client.env.CLIENT_ID),
+                    { body: commands },
+                );
+
+                console.log(`Successfully set ${setCommands.length} commands globaly`);
+            }
+        } catch (exception) {
+            console.error(exception);
+        }
+    })
+  }
+
   async LoadEvents() {
     const files = (
       await glob(
-        env.NODE_ENV === "production"
+        this.client.env.NODE_ENV === "production"
           ? "build/events/**/*.js"
           : "src/events/**/*.ts",
       )
@@ -40,5 +97,37 @@ export default class Handler implements IHandler {
 
       return delete require.cache[require.resolve(file)];
     });
+  }
+
+  async LoadSlashCommands() {
+    const commandFiles = (
+      await glob(
+        this.client.env.NODE_ENV === "production"
+          ? "build/SlashCommands/**/*.js"
+          : "src/SlashCommands/**/*.ts",
+      )
+    ).map((filePath) => path.resolve(filePath));
+
+    commandFiles.map(async (file: string) => {
+      const command: SlashCommand | SubSlashCommand = new (
+        await import(file)
+      ).default(this.client);
+
+      if (!command.name) {
+        return (
+          delete require.cache[require.resolve(file)] &&
+          console.log(`${file.split("/").pop()} does not have a name`)
+        );
+      }
+
+      if (file.split("/").pop()?.split(".")[2]) {
+        return this.client.subSlashCommands.set(command.name, command);
+      }
+
+      this.client.slashCommands.set(command.name, command as SlashCommand);
+        
+      return delete require.cache[require.resolve(file)];
+    });
+
   }
 }
