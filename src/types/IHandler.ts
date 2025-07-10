@@ -1,3 +1,6 @@
 export default interface IHandler {
-  LoadEvents: () => Promise<void>;
+  RegisterCommands: () => void;
+  LoadEvents: () => void;
+  LoadSlashCommands: () => void;
+  LoadMessageCommands: () => void;
 }

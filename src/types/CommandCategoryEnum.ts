@@ -1,5 +1,6 @@
 enum CommandCategoryEnum {
-    utilities = "Utilities"
+  utilities = "Utilities",
+  devonly = "Dev",
 }
 
-export default CommandCategoryEnum; 
+export default CommandCategoryEnum;
