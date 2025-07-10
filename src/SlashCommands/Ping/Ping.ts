@@ -8,7 +8,7 @@ import {
 import type TheBotClient from "server";
 import CommandCategoryEnum from "types/CommandCategoryEnum";
 
-export default class Test extends SlashCommand {
+export default class PingCommand extends SlashCommand {
   constructor(client: TheBotClient) {
     super(client, {
       name: "ping",
@@ -27,7 +27,7 @@ export default class Test extends SlashCommand {
   ) {
     interaction.reply({
       content: "Pong!",
-      flags: ["Ephemeral"]
+      flags: ["Ephemeral"],
     });
   }
   // public override async autoComplete(interaction: AutocompleteInteraction<CacheType>) {}

@@ -20,5 +20,7 @@ export default class Ready extends Event {
     });
 
     this.client.user?.setStatus(PresenceUpdateStatus.Online);
+
+    this.client.handlers.RegisterCommands();
   }
 }

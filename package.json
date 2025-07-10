@@ -3,6 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc --build",
@@ -19,6 +20,7 @@
     "@t3-oss/env-core": "^0.13.8",
     "discord.js": "^14.21.0",
     "glob": "^11.0.3",
+    "the-bot": ".",
     "zod": "^3.25.76"
   }
 }

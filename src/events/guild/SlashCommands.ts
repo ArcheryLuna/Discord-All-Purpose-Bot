@@ -24,7 +24,7 @@ export default class SlashCommandHandler extends Event {
     if (!command) {
       await interaction.reply({
         content: "This command does not exist!",
-        flags: ["Ephemeral"]  
+        flags: ["Ephemeral"],
       });
       this.client.slashCommands.delete(interaction.commandName);
       return;
@@ -42,25 +42,26 @@ export default class SlashCommandHandler extends Event {
       timestamp.has(interaction.user.id) &&
       now < (timestamp.get(interaction.user.id) || 0) + cooldownAmount
     ) {
-        interaction.reply({
-            content: `Please wait another \`${((((timestamp.get(interaction.user.id) || 0) + cooldownAmount) - now) / 1000).toFixed(1)}\` seconds to run this command!`,
-            ephemeral: true
-        })
+      interaction.reply({
+        content: `Please wait another \`${(((timestamp.get(interaction.user.id) || 0) + cooldownAmount - now) / 1000).toFixed(1)}\` seconds to run this command!`,
+        ephemeral: true,
+      });
 
-        return;
+      return;
     }
 
     timestamp.set(interaction.user.id, now);
     setTimeout(() => timestamp.delete(interaction.user.id), cooldownAmount);
 
     try {
-        const subCommandGroup = interaction.options.getSubcommandGroup(false);
-        const subCommand = `${interaction.commandName}${subCommandGroup ? `.${subCommandGroup}` : ""}.${interaction.options.getSubcommand(false) || ""}`;
+      const subCommandGroup = interaction.options.getSubcommandGroup(false);
+      const subCommand = `${interaction.commandName}${subCommandGroup ? `.${subCommandGroup}` : ""}.${interaction.options.getSubcommand(false) || ""}`;
 
-        this.client.subSlashCommands.get(subCommand)?.run(interaction) || command.run(interaction);
-        return;
+      this.client.subSlashCommands.get(subCommand)?.run(interaction) ||
+        command.run(interaction);
+      return;
     } catch (exception) {
-        console.log(exception);
+      console.log(exception);
     }
   }
 }

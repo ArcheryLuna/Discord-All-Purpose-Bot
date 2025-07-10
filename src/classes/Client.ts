@@ -3,6 +3,7 @@ import { Client, Collection } from "discord.js";
 import Handler from "class/Handlers";
 import SlashCommand from "./SlashCommands/SlashCommand";
 import SubSlashCommand from "./SlashCommands/SubSlashCommand";
+import type MessageCommand from "./MessageCommands/MessageCommand";
 
 export default class TheBotClient extends Client {
   public env = env;
@@ -12,17 +13,34 @@ export default class TheBotClient extends Client {
     new Collection();
   public slashCommandCooldowns: Collection<string, Collection<string, number>> =
     new Collection();
+  public messageCommands: Collection<string, MessageCommand> = new Collection();
+  public messageCommandCooldowns: Collection<
+    string,
+    Collection<string, number>
+  > = new Collection();
 
   constructor() {
     super({
-      intents: [],
+      intents: [
+        "Guilds",
+        "GuildMessages",
+        "MessageContent",
+        "GuildBans",
+        "GuildMembers",
+        "DirectMessages",
+        "DirectMessageTyping",
+        "DirectMessageReactions",
+        "MessageContent",
+        "GuildVoiceStates",
+      ],
     });
 
     this.handlers = new Handler(this);
   }
 
   public LoadHandlers() {
-      this.handlers.RegisterCommands();
+    this.handlers.LoadSlashCommands();
+    this.handlers.LoadMessageCommands();
     this.handlers.LoadEvents();
   }
 
